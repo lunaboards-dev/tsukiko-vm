@@ -195,5 +195,8 @@ _ENV.ins = ins
 require("tsukiko.instructions")
 require("tsukiko.parser")
 
+function tsukiko.run(func)
+	
+end
 
 return tsukiko

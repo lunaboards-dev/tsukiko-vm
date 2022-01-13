@@ -35,3 +35,5 @@ local function decode_ins(blk, pos)
 end
 
 function state:call(idx, ...)
+
+end

@@ -21,12 +21,12 @@ end)
 
 ins "loadnil" (function(vm, proc, a, b)
 	for i=a, a+b do
-		proc.register[i] = {}
+		proc.register[i] = nil
 	end
 end)
 
 ins "getupval" (function(vm, proc, a, b)
-
+	
 end)
 
 
