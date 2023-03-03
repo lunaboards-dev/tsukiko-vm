@@ -6,7 +6,7 @@ function func.load_string(str, next)
 		size, next = string.unpack("T", str, next)
 	end
 	local s = str:sub(next, next+size-2)
-	next = next+size-1
+	next = next+math.max(size-1, 0)
 	return s, next
 end
 
@@ -19,10 +19,13 @@ end
 
 function func.load_protos(str, next)
 	local protos = {}
+	print(string.format("%.x", next))
 	local n, next = string.unpack("i", str, next)
+	print(n)
 	for i=1, n do
 		local p
-		p, next = func.load(str:sub(next))
+		print(string.format("%.x", next))
+		p, next = func.load(str, next)
 		protos[i] = p
 	end
 	return protos, next
@@ -85,7 +88,8 @@ end
 
 function func.load_debug(uv, str, next)
 	local line_info = {}
-	local n, next = string.unpack("i", str, next)
+	local n
+	n, next = string.unpack("i", str, next)
 	local linfo = str:sub(next, next+(n*4)-1)
 	next = next + (n*4)
 
@@ -114,7 +118,8 @@ function func.load_debug(uv, str, next)
 end
 
 function func.load(str, next)
-	local src, next = func.load_string(str, next or 1)
+	local src, code, const, uvs, protos, linfo, locvars
+	src, next = func.load_string(str, next or 1)
 	print("src", src)
 	local line_defined, last_line_defined, num_params, is_va, max_stack, next = string.unpack("iiBBB", str, next)
 	print("line", line_defined)
@@ -122,13 +127,16 @@ function func.load(str, next)
 	print("num params", num_params)
 	print("is vararg", is_va)
 	print("max_stack", max_stack)
-	local code, next = func.load_code(str, next)
-	local const, next = func.load_constants(str, next)
+	code, next = func.load_code(str, next)
+	const, next = func.load_constants(str, next)
 	print("constants:")
 	for i=1, const.n do print(i, string.format("%s", tostr(const[i]))) end
-	local uvs, next = func.load_upvalues(str, next)
-	local protos, next = func.load_protos(str, next)
-	local linfo, locvars, next = func.load_debug(uvs, str, next)
+	uvs, next = func.load_upvalues(str, next)
+	protos, next = func.load_protos(str, next)
+	linfo, locvars, next = func.load_debug(uvs, str, next)
+	print("locals:")
+	for i=1, #locvars do print(string.format("%s\t%x\t%x", locvars[i].name, locvars[i].startpc, locvars[i].endpc)) end
+	print("upvalues:")
 	for i=1, #uvs do print(string.format("%s\t%x\t%x", uvs[i].name, uvs[i].instack, uvs[i].idx)) end
 	return {
 		code = code,
