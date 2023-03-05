@@ -14,26 +14,29 @@ local function create_state()
 	}, {__index=state})
 end
 
-local function decode_ins(blk, pos)
-	local iv = string.unpack("I", blk, pos)
+local function decode_ins(blk, pos, tbl)
+	local iv, next = string.unpack("I", blk, pos)
 	local op, a, b, c = iv & 0x3f,
 						(iv >> 5) & 0xFF,
 						(iv >> 13) & 0x1FF,
 						(iv >> 22) & 0x1FF
 	local ax = iv >> 5
 	local bx = iv >> 13
-	local sbx = cast(bx, "H", "h") -- you think i'm gonna take the effort to do this in a non-jank way? lol
-	return {
-		op = op,
-		a = a,
-		b = b,
-		c = c,
-		ax = ax,
-		bx = bx,
-		sbx = sbx
-	}
+	local sbx = bx - 0x1FFFF
+	tbl.op = op
+	tbl.a = a
+	tbl.b = b
+	tbl.c = c
+	tbl.ax = ax
+	tbl.bx = bx
+	tbl.sbx = sbx
+	return next
 end
+
+tsukiko.decode_ins = decode_ins
 
 function state:call(idx, ...)
 
 end
+
+tsukiko.state = state

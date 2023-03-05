@@ -138,6 +138,23 @@ function func.load(str, next)
 	for i=1, #locvars do print(string.format("%s\t%x\t%x", locvars[i].name, locvars[i].startpc, locvars[i].endpc)) end
 	print("upvalues:")
 	for i=1, #uvs do print(string.format("%s\t%x\t%x", uvs[i].name, uvs[i].instack, uvs[i].idx)) end
+	local npos = 1
+	local ins = {}
+	local args = {}
+	while code:sub(npos, npos+3) ~= "" do
+		npos = tsukiko.decode_ins(code, npos, ins)
+		--print(ins.op)
+		local iname = tsukiko.ilist[ins.op+1]
+		local idat = tsukiko.instructions[ins.op]
+		local regs = idat.regs
+		for i=1, #regs do
+			table.insert(args, ins[regs[i]])
+		end
+		print("% "..iname, table.unpack(args))
+		args[1] = nil
+		args[2] = nil
+		args[3] = nil
+	end
 	return {
 		code = code,
 		const = const,

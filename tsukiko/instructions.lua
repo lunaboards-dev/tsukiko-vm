@@ -1,4 +1,4 @@
-print(tsukiko.version_string)
+--print(tsukiko.version_string)
 ins "move" (function(vm, proc, a, b)
 	proc.register[a] = proc.register[b]
 end)
@@ -26,7 +26,7 @@ ins "loadnil" (function(vm, proc, a, b)
 end)
 
 ins "getupval" (function(vm, proc, a, b)
-	
+	--proc.register[a] = proc.upvalue[b]
 end)
 
 

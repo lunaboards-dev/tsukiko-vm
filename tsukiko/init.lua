@@ -161,13 +161,14 @@ local instructions = {}
 tsukiko.instructions = instructions
 tsukiko.ilist = ilist
 
-local registers = {
+tsukiko.registers = {
 	a = 1,
 	b = 2,
 	c = 4,
 	bx = 8,
 	sbx = 16,
-	ax = 32
+	ax = 32,
+	"a", "b", "c", "bx", "sbx", "ax"
 }
 
 local function ins(name)
@@ -176,7 +177,7 @@ local function ins(name)
 		local wanted_regs = {}
 		while true do
 			local ln = debug.getlocal(func, li)
-			if not ln or not registers[ln] then
+			if not ln or not tsukiko.registers[ln] then
 				break
 			end
 			table.insert(wanted_regs, ln:lower())
@@ -194,6 +195,7 @@ _ENV.tsukiko = tsukiko
 _ENV.ins = ins
 require("tsukiko.instructions")
 require("tsukiko.parser")
+require("tsukiko.state")
 
 function tsukiko.run(func)
 	
