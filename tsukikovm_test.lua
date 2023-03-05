@@ -45,7 +45,18 @@ function tailcall()
 	return hello()
 end
 
+function tailcall2()
+	local tc = hello
+	local r = 1324
+	for i=1, 3 do
+		r = r << 2
+		r = (r & 0xFF << 1) | ((r & 0x1FF) >> 8)
+	end
+	return tc(r)
+end
+
 local function test(name, func)
+	if arg[1] and arg[1] ~= name then return end
 	print("===================================")
 	print(name)
 	print("===================================")
@@ -58,6 +69,7 @@ local function test(name, func)
 	print("===================================")
 	print("pass!")
 	print("===================================\n")
+	tsukiko.run(func, {print=print})
 end
 
 test("hello", hello)
@@ -68,3 +80,5 @@ test("anonymous", function()
 	print("ok!")
 end)
 test("taillcall", tailcall)
+test("taillcall2", tailcall2)
+test("test", test)

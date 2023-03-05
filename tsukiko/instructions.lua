@@ -1,15 +1,23 @@
 --print(tsukiko.version_string)
+local function val(proc, v, mask, vmask)
+	if v & mask > 0 then
+		
+		return proc.constants[(v & vmask)+1]
+	end
+	return proc.register[v & vmask]
+end
 ins "move" (function(vm, proc, a, b)
 	proc.register[a] = proc.register[b]
 end)
 
 
 ins "loadk" (function(vm, proc, a, bx)
-	proc.register[a] = proc.constants[bx]
+	proc.register[a] = proc.constants[bx+1]
+	return true
 end)
 
 ins "loadkx" (function(vm, proc, a)
-	proc.register[a] = proc.constants[proc:get_extra()]
+	proc.register[a] = proc.constants[proc:get_extra()+1]
 end)
 
 ins "loadbool" (function(vm, proc, a, b, c)
@@ -32,7 +40,9 @@ end)
 
 
 ins "gettabup" (function(vm, proc, a, b, c)
-
+	--print(proc.upvalues[b], val(proc, c, 0x100, 0xFF))
+	proc.register[a] = proc.upvalues[b][val(proc, c, 0x100, 0xFF)]
+	return true
 end)
 
 ins "gettable" (function(vm, proc, a, b, c)
@@ -170,7 +180,18 @@ end)
 
 
 ins "call" (function(vm, proc, a, b, c)
-
+	local f = proc.register[a]
+	--print(a, f)
+	local params
+	if b == 1 then
+		params = {}
+	else
+		params = table.pack(table.unpack(proc.register, a+1, a+b-1))
+	end
+	if type(f) == "function" then
+		f(table.unpack(params))
+	end
+	return true
 end)
 
 ins "tailcall" (function(vm, proc, a, b, c)

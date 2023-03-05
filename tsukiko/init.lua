@@ -183,9 +183,11 @@ local function ins(name)
 			table.insert(wanted_regs, ln:lower())
 			li = li+1
 		end
+		wanted_regs.n = #wanted_regs
 		local insinfo = {
 			regs = wanted_regs,
-			func = func
+			func = func,
+			name = name:lower()
 		}
 		instructions[ilist[name:lower()]] = insinfo
 		--print(name, table.unpack(wanted_regs))
@@ -197,8 +199,15 @@ require("tsukiko.instructions")
 require("tsukiko.parser")
 require("tsukiko.state")
 
-function tsukiko.run(func)
-	
+function tsukiko.run(func, env)
+	local dmp = string.dump(func)
+	local func = tsukiko.parser.parse(dmp)
+	local st = tsukiko.new_state(func)
+	for k, v in pairs(env) do
+		st.env[k] = v
+	end
+	print("!!! st:run()")
+	return st:run()
 end
 
 return tsukiko
