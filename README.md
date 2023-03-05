@@ -6,7 +6,6 @@ A big thanks to [LuaDisAss](https://github.com/jcmnn/LuaDisAss) and [Ravi](https
 ## Progress
 * [x] Dump header parsing
 * [x] Function header parsing
-* [ ] Instruction parsing
-	* Currently, arguments are decoded incorrectly.
+* [x] Instruction parsing
 * [ ] Able to run code
 * [ ] Compiler? Maybe?
