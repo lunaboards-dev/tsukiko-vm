@@ -1,2 +1,2 @@
 tests/*.luac
-tests/*.luas
+*.luas
