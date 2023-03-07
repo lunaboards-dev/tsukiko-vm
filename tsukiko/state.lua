@@ -28,7 +28,7 @@ local function decode_ins(blk, pos, tbl)
 	local ax = args
 	local bx = (b | c) >> 8
 	local sbx = bx - 0x1FFFF
-	tbl.op = op
+	tbl.op = op+1
 	tbl.a = a
 	tbl.c = b >> 8 -- don't worry about it
 	tbl.b = c >> 17
@@ -41,7 +41,6 @@ end
 
 tsukiko.decode_ins = decode_ins
 
--- thread doesn't do anything for now
 function state:run(count)
 	count = count or math.huge
 	local icount = 0
@@ -58,8 +57,12 @@ function state:run(count)
 		end
 		icount = icount+1
 		self.pc = self.pc+1
+		if self.rtv then
+			self.returns = table.pack(table.unpack(self.regs, self.rtv, self.rtv+self.rtv_count-1))
+			self.rtv, self.rtv_count = nil, nil
+			return icount, true
+		end
 	end
-	print(count, icount)
 	return icount
 end
 

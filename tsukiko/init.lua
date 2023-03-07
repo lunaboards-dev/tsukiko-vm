@@ -13,6 +13,13 @@ tsukiko.copyright = string.format("%s  Copyright (C) 2022 lunaboards-dev", tsuki
 
 tsukiko.signature = "\x1bLua"
 
+tsukiko.objtypes = {
+	func = {},
+	state = {},
+	thread = {},
+	userdata = {}
+}
+
 tsukiko.types = {
 	tnil = 0,
 	tbool = 1,
@@ -153,7 +160,7 @@ local ilist = {
 }
 
 for i=1, #ilist do
-	ilist[ilist[i]] = i-1
+	ilist[ilist[i]] = i
 end
 
 local instructions = {}

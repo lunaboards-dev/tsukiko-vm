@@ -181,6 +181,7 @@ end)
 
 ins "call" (function(vm, proc, a, b, c)
 	local f = proc.register[a]
+	local t = type(f)
 	--print(a, f)
 	local params
 	if b == 1 then
@@ -188,8 +189,10 @@ ins "call" (function(vm, proc, a, b, c)
 	else
 		params = table.pack(table.unpack(proc.register, a+1, a+b-1))
 	end
-	if type(f) == "function" then
+	if t == "function" then
 		f(table.unpack(params))
+	elseif t == "table" then
+
 	end
 	return true
 end)
@@ -199,7 +202,9 @@ ins "tailcall" (function(vm, proc, a, b, c)
 end)
 
 ins "return" (function(vm, proc, a, b)
-
+	proc.rtv = a
+	proc.rtv_count = b-1
+	return true
 end)
 
 

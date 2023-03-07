@@ -144,7 +144,7 @@ function func.load(str, next)
 	while code:sub(npos, npos+3) ~= "" do
 		npos = tsukiko.decode_ins(code, npos, ins)
 		--print(ins.op)
-		local iname = tsukiko.ilist[ins.op+1]
+		local iname = tsukiko.ilist[ins.op]
 		local idat = tsukiko.instructions[ins.op]
 		local regs = idat.regs
 		for i=1, #regs do
@@ -155,14 +155,14 @@ function func.load(str, next)
 		args[2] = nil
 		args[3] = nil
 	end
-	return {
+	return setmetatable({
 		code = code,
 		const = const,
 		uvs = uvs,
 		protos = protos,
 		linfo = linfo,
 		locvars = locvars
-	}, next
+	}, {__dtype=tsukiko.objtypes.func}), next
 end
 
 
