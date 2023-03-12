@@ -15,6 +15,7 @@ function subfunc()
 		x, y = test1(x, y)
 	end
 	print(x, y)
+	return x, y
 end
 
 function ref()
@@ -57,19 +58,20 @@ end
 
 local function test(name, func)
 	if arg[1] and arg[1] ~= name then return end
-	print("===================================")
-	print(name)
-	print("===================================")
+	tsukiko.dprint("===================================")
+	tsukiko.dprint(name)
+	tsukiko.dprint("===================================")
 	local d = string.dump(func)
 	local f = io.open("tests/tvm_test_"..name..".luac", "wb")
 	f:write(d)
 	f:close()
 	os.execute("luadisass -d tests/tvm_test_"..name..".luac tests/tvm_test_"..name..".luas")
 	local res = tsukiko.parser.parse(d)
-	print("===================================")
-	print("pass!")
-	print("===================================\n")
-	tsukiko.run(func, {print=print})
+	tsukiko.dprint("===================================")
+	tsukiko.dprint("pass!")
+	tsukiko.dprint("===================================\n")
+	tsukiko.dprint("LVM Returns:", func())
+	tsukiko.dprint("TVM Returns:", tsukiko.run(func, {print=print}))
 end
 
 test("hello", hello)
@@ -82,3 +84,13 @@ end)
 test("taillcall", tailcall)
 test("taillcall2", tailcall2)
 test("test", test)
+
+test("version", function()
+	print("VM: ".._VERSION)
+	return _VERSION
+end)
+test("global", function()
+	for k, v in pairs(_G) do
+		print(k, v)
+	end
+end)

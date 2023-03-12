@@ -19,12 +19,12 @@ end
 
 function func.load_protos(str, next)
 	local protos = {}
-	print(string.format("%.x", next))
+	tsukiko.dprint(string.format("%.x", next))
 	local n, next = string.unpack("i", str, next)
-	print(n)
+	tsukiko.dprint(n)
 	for i=1, n do
 		local p
-		print(string.format("%.x", next))
+		tsukiko.dprint(string.format("%.x", next))
 		p, next = func.load(str, next)
 		protos[i] = p
 	end
@@ -62,19 +62,19 @@ function func.load_constants(str, next)
 		else
 			error("unknown constant type "..string.format("%x", t))
 		end
-		--print(string.format("%.4x\t%s", i, tostr(consts[i])))
+		--tsukiko.dprint(string.format("%.4x\t%s", i, tostr(consts[i])))
 	end
 	return consts, next
 end
 
 local function dstr(s)
-	print(string.format(string.rep("%.2x", #s), s:byte(1, #s)))
+	tsukiko.dprint(string.format(string.rep("%.2x", #s), s:byte(1, #s)))
 end
 
 function func.load_upvalues(str, next)
 	local uvs = {}
 	local n, next = string.unpack("i", str, next)
-	--print(n)
+	--tsukiko.dprint(n)
 	for i=1, n do
 		local instack, idx
 		instack, idx, next = string.unpack("BB", str, next)
@@ -120,37 +120,37 @@ end
 function func.load(str, next)
 	local src, code, const, uvs, protos, linfo, locvars
 	src, next = func.load_string(str, next or 1)
-	print("src", src)
+	tsukiko.dprint("src", src)
 	local line_defined, last_line_defined, num_params, is_va, max_stack, next = string.unpack("iiBBB", str, next)
-	print("line", line_defined)
-	print("last line", last_line_defined)
-	print("num params", num_params)
-	print("is vararg", is_va)
-	print("max_stack", max_stack)
+	tsukiko.dprint("line", line_defined)
+	tsukiko.dprint("last line", last_line_defined)
+	tsukiko.dprint("num params", num_params)
+	tsukiko.dprint("is vararg", is_va)
+	tsukiko.dprint("max_stack", max_stack)
 	code, next = func.load_code(str, next)
 	const, next = func.load_constants(str, next)
-	print("constants:")
-	for i=1, const.n do print(i, string.format("%s", tostr(const[i]))) end
+	tsukiko.dprint("constants:")
+	for i=1, const.n do tsukiko.dprint(i, string.format("%s", tostr(const[i]))) end
 	uvs, next = func.load_upvalues(str, next)
 	protos, next = func.load_protos(str, next)
 	linfo, locvars, next = func.load_debug(uvs, str, next)
-	print("locals:")
-	for i=1, #locvars do print(string.format("%s\t%x\t%x", locvars[i].name, locvars[i].startpc, locvars[i].endpc)) end
-	print("upvalues:")
-	for i=1, #uvs do print(string.format("%s\t%x\t%x", uvs[i].name, uvs[i].instack, uvs[i].idx)) end
+	tsukiko.dprint("locals:")
+	for i=1, #locvars do tsukiko.dprint(string.format("%s\t%x\t%x", locvars[i].name, locvars[i].startpc, locvars[i].endpc)) end
+	tsukiko.dprint("upvalues:")
+	for i=1, #uvs do tsukiko.dprint(string.format("%s\t%x\t%x", uvs[i].name, uvs[i].instack, uvs[i].idx)) end
 	local npos = 1
 	local ins = {}
 	local args = {}
 	while code:sub(npos, npos+3) ~= "" do
 		npos = tsukiko.decode_ins(code, npos, ins)
-		--print(ins.op)
+		--tsukiko.dprint(ins.op)
 		local iname = tsukiko.ilist[ins.op]
 		local idat = tsukiko.instructions[ins.op]
 		local regs = idat.regs
 		for i=1, #regs do
 			table.insert(args, ins[regs[i]])
 		end
-		print("% "..iname, table.unpack(args))
+		tsukiko.dprint("% "..iname, table.unpack(args))
 		args[1] = nil
 		args[2] = nil
 		args[3] = nil

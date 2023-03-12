@@ -1,4 +1,5 @@
 local state = {}
+local proc = require("tsukiko.proc")
 
 local function cast(i, f, t)
 	return string.unpack(t, string.pack(f, i))
@@ -42,40 +43,52 @@ end
 tsukiko.decode_ins = decode_ins
 
 function state:run(count)
-	count = count or math.huge
-	local icount = 0
-	local ins = {}
-	local args = {}
-	while count > icount do
-		decode_ins(self.code, (self.pc*4)+1, ins)
-		local ix = tsukiko.instructions[ins.op]
-		for i=1, ix.regs.n do
-			args[i] = ins[ix.regs[i]]
-		end
-		if not ix.func(nil, self, table.unpack(args)) then
-			error(string.format("UNIMPLEMENTED: %s(%s) pc: %x", ix.name, table.concat(ix.regs, ","), self.pc))
-		end
-		icount = icount+1
-		self.pc = self.pc+1
-		if self.rtv then
-			self.returns = table.pack(table.unpack(self.regs, self.rtv, self.rtv+self.rtv_count-1))
-			self.rtv, self.rtv_count = nil, nil
-			return icount, true
-		end
-	end
-	return icount
+	
 end
 
-function tsukiko.new_state(func)
-	local env = {}
+function state:call(start, argoff, argcount, rtv)
+
+end
+
+function state:metamethod(register, method, left, right)
+
+end
+
+function state:regval(n)
+
+end
+
+function state:retvals()
+	return table.unpack(self.returns)
+end
+
+function state:new_proc(proto, env, instance)
+	local e = tsukiko.envcopy(env)
+	e._VERSION = tsukiko.version_string
+	return setmetatable({
+		inst = instance,
+		func = proto,
+		env = e,
+		upvals = {},
+		state = self,
+		__type = tsukiko.objtypes.proc
+	}, {__index=proc})
+end
+
+function state:load(code, env)
+	-- no compiler yet
+	local func = tsukiko.parser.parse(code)
+	return self:new_proc(func, env, nil):instance()
+end
+
+function tsukiko.new_state()
+	local env = {
+		_VERSION = tsukiko.version_string
+	}
 	local st = {
 		env = env,
-		upvalues = {[0]=env},
-		locals = {},
-		constants = func.const,
-		register = {},
-		pc = 0,
-		code = func.code
+		depth = 0,
+		callstack = {}
 	}
 	return setmetatable(st, {__index=state})
 end

@@ -31,7 +31,7 @@ function parser.parse(str)
 	local next = parser.parse_header(str)
 	local uvs
 	uvs, next = string.unpack("B", str, next)
-	print("uvs:", uvs)
+	tsukiko.dprint("uvs:", uvs)
 	return func.load(str, next)
 end
 

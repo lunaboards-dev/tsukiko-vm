@@ -14,7 +14,8 @@ tsukiko.copyright = string.format("%s  Copyright (C) 2022 lunaboards-dev", tsuki
 tsukiko.signature = "\x1bLua"
 
 tsukiko.objtypes = {
-	func = {},
+	proc = {},
+	procinst = {},
 	state = {},
 	thread = {},
 	userdata = {}
@@ -37,6 +38,14 @@ tsukiko.types.tlngstr = tsukiko.types.tstring | (1 << 4)
 
 tsukiko.types.tnumflt = tsukiko.types.tnumber
 tsukiko.types.tnumint = tsukiko.types.tnumber | (1 << 4)
+
+function tsukiko.dprint(...)
+	local t = table.pack(...)
+	for i=1, t.n do
+		t[i] = tostring(t[i])
+	end
+	io.stderr:write(table.concat(t, "\t"),"\n")
+end
 
 --[[local ilist = {
 	"move",
@@ -206,15 +215,51 @@ require("tsukiko.instructions")
 require("tsukiko.parser")
 require("tsukiko.state")
 
+function tsukiko.max(array)
+	local m = 0
+	for k, v in pairs(array) do
+		m = math.max(m, k)
+	end
+	return m
+end
+
+function tsukiko.envcopy(env, new)
+	new = new or {}
+	for k, v in pairs(env) do
+		new[k] = v
+	end
+	return new
+end
+
+function tsukiko.error(instance, err)
+	tsukiko.dprint("DUMP:")
+	tsukiko.dprint("\tregisters:")
+	local regs = tsukiko.max(instance.register)
+	for i=1, regs do
+		tsukiko.dprint("\t", i-1, type(instance.register[i]), instance.register[i])
+	end
+	tsukiko.dprint("\tupvalues:")
+	for i=1, #instance.upvals do
+		local uv = instance.upvals[i]
+		local val = uv[1][uv[2]]
+		tsukiko.dprint("\t", i-1, type(val), val)
+	end
+	error(err)
+end
+
 function tsukiko.run(func, env)
 	local dmp = string.dump(func)
-	local func = tsukiko.parser.parse(dmp)
-	local st = tsukiko.new_state(func)
-	for k, v in pairs(env) do
+	--local func = tsukiko.parser.parse(dmp)
+	--local st = tsukiko.new_state(func)
+	--[[for k, v in pairs(env) do
 		st.env[k] = v
 	end
-	print("!!! st:run()")
-	return st:run()
+	tsukiko.dprint("!!! st:run()")
+	st:run()
+	return st:retvals()]]
+	local T = tsukiko.new_state()
+	local func = T:load(dmp, env or {})
+	return func:step()
 end
 
 return tsukiko
